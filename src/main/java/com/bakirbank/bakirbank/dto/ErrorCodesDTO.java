@@ -1,5 +1,6 @@
 package com.bakirbank.bakirbank.dto;
 
+
 import lombok.Getter;
 import lombok.Setter;
 

@@ -5,22 +5,20 @@ import com.bakirbank.bakirbank.api.request.MoneyTransferRequest;
 import com.bakirbank.bakirbank.api.response.AddMoneyResponse;
 import com.bakirbank.bakirbank.api.response.BaseResponse;
 import com.bakirbank.bakirbank.api.response.TransferMoneyResponse;
-import com.bakirbank.bakirbank.api.response.WithdrawMoneyResponse;
 import com.bakirbank.bakirbank.rest.controller.api.AccountControllerApi;
 import com.bakirbank.bakirbank.rest.service.AccountConsumerService;
 import com.bakirbank.bakirbank.rest.service.AccountProducerService;
-import io.micrometer.observation.Observation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 
-@Controller
-@RequestMapping("/account")
+@RestController
+@RequestMapping(path = "/account")
 @CrossOrigin
 @RequiredArgsConstructor
 
@@ -36,30 +34,30 @@ public class AccountController implements AccountControllerApi {
     }
 
     @Override
-    public ResponseEntity<WithdrawMoneyResponse> withDrawMoney(List<String> withdrawParams) {
-        accountProducerService.withdrawMoney(withdrawParams.get(0), Double.parseDouble(withdrawParams.get(1)));
+    public ResponseEntity<BaseResponse> testWithDrawMoney(String customerId, String amount) {
+        accountProducerService.withdrawMoney(customerId, Double.parseDouble(amount));
 
-
-        return null;
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setProcessMessage("Isleminiz basariyla alindi.");
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
     @Override
-    public ResponseEntity<BaseResponse> testWithDrawMoney(List<String> withdrawParams) {
-        accountProducerService.withdrawMoney(withdrawParams.get(0), Double.parseDouble(withdrawParams.get(1)));
+    public ResponseEntity<BaseResponse> addMoney(String customerId, String amount) {
+        accountProducerService.addMoney(customerId,Double.parseDouble(amount));
 
         BaseResponse baseResponse = new BaseResponse();
-        baseResponse.setProcessMessage("Isleminiz basariyla tamamlandi.");
+        baseResponse.setProcessMessage("Isleminiz basariyla alindi.");
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
 
     @Override
-    public ResponseEntity<AddMoneyResponse> addMoney(List<String> addParams) {
-        return null;
-    }
+    public ResponseEntity<BaseResponse> transferMoney(MoneyTransferRequest moneyTransferRequest) {
+        accountProducerService.transferMoney(moneyTransferRequest);
 
-    @Override
-    public ResponseEntity<TransferMoneyResponse> transferMoney(MoneyTransferRequest moneyTransferRequest) {
-        return null;
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setProcessMessage("Isleminiz basariyla alindi.");
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 }

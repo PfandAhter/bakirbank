@@ -30,6 +30,9 @@ public class Account implements Serializable {
     private String accountNumber;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
     private String customerId;
 
     @Column(nullable = false)
@@ -52,7 +55,9 @@ public class Account implements Serializable {
 
     private LocalDateTime lastUpdatedDate;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-    private List<Transaction> transactions;
+    @OneToMany(mappedBy = "senderAccount", cascade = CascadeType.ALL)
+    private List<Transaction> transactionsAsSender;
 
+    @OneToMany(mappedBy = "receiverAccount", cascade = CascadeType.ALL)
+    private List<Transaction> transactionsAsReceiver;
 }

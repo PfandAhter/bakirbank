@@ -12,8 +12,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
+//@AllArgsConstructor
+
 public class BaseAccountRequest extends BaseRequest{
 
     @NotBlank(message = "Customer id must not be null")
@@ -24,7 +24,7 @@ public class BaseAccountRequest extends BaseRequest{
     private Double balance;
 
     @NotNull(message = "Currency must not be null")
-    @ValidCurrency
+    //@ValidCurrency
     private Currency currency;
 
 }

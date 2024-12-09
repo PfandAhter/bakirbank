@@ -9,4 +9,8 @@ import lombok.Setter;
 public class TransferMoneyResponse extends WithdrawMoneyResponse{
 
 
+    public TransferMoneyResponse(String ownerName, Double balance) {
+        super(ownerName, balance);
+    }
+
 }

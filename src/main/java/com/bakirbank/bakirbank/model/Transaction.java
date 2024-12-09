@@ -18,13 +18,16 @@ import java.time.LocalDateTime;
 public class Transaction implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
+    @JoinColumn(name = "sender_account_id", nullable = false)
+    private Account senderAccount;
 
-    private LocalDateTime transactionDate;
+    @ManyToOne
+    @JoinColumn(name = "receiver_account_id", nullable = false)
+    private Account receiverAccount;
 
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
@@ -32,4 +35,6 @@ public class Transaction implements Serializable {
     private Double amount;
 
     private String description;
+
+    private LocalDateTime transactionDate;
 }

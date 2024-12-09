@@ -21,15 +21,16 @@ public class AccountProducerService {
 
     private final KafkaTemplate<String,MoneyTransferRequest> moneyTransferKafkaTemplate;
 
-    public void addMoney (String accountNumber, double amount){
-        String message = String.format("%s %s", accountNumber, amount);
+    public void addMoney (String customerId, double amount){
+        String message = String.format("%s %s", customerId, amount);
         kafkaTemplate.send("add-money", message);
-        log.info("Islem alindi. Hesap numarasi: " + accountNumber + " miktar: " + amount);
+        log.info("Islem alindi. Hesap numarasi: " + customerId + " miktar: " + amount);
     }
 
     public void withdrawMoney (String accountNumber, double amount){
         String message = String.format("%s %s", accountNumber, amount);
         kafkaTemplate.send("withdraw-money", message);
+
         log.info("Islem alindi. Hesap numarasi: " + accountNumber + " miktar: " + amount);
     }
 
