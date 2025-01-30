@@ -1,15 +1,13 @@
 package com.bakirbank.bakirbank.config;
 
 
-import com.bakirbank.bakirbank.exception.NotFoundException;
+import com.bakirbank.bakirbank.api.request.MoneyProcessFailed;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartition;
-import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.listener.ErrorHandlingUtils;
+import org.springframework.kafka.listener.KafkaListenerErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
 
 import com.bakirbank.bakirbank.api.request.MoneyTransferRequest;
@@ -92,61 +90,73 @@ public class KafkaConfiguration {
         FixedBackOff fixedBackOff = new FixedBackOff(3000L,0);
         DefaultErrorHandler defaultErrorHandler = new DefaultErrorHandler(fixedBackOff);
 
-
         return defaultErrorHandler;
     }
 
-    /*@Bean
-    public DefaultErrorHandler defaultErrorHandler() {
+
+    //DEAD LETTER TOPIC
+    @Bean
+    public DefaultErrorHandler deadLetterErrorHandler() {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
-                dltKafkaTemplate(), // Burada doğru KafkaTemplate sağlanmalı
-                (record, ex) -> new TopicPartition(record.topic() + ".DLT", record.partition())
+                dltKafkaTemplate(),
+                (record, ex) -> new TopicPartition("money-process.DLT", record.partition())
         );
 
-        FixedBackOff fixedBackOff = new FixedBackOff(1000L, 3); // 1 saniye arayla 3 kez deneme
-
+        FixedBackOff fixedBackOff = new FixedBackOff(3000L, 3); // 3 kez dene, her 3 saniyede bir
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, fixedBackOff);
 
-        // Özel durumlar için loglama
         errorHandler.setRetryListeners((record, ex, deliveryAttempt) -> {
-            log.warn("Hata işleniyor! Record: {}, Attempt: {}, Exception: {}",
-                    record.value(), deliveryAttempt, ex.getMessage());
+            log.warn("Retry attempt: {}, record: {}, exception: {}", deliveryAttempt, record.value(), ex.getMessage());
         });
 
-        // İşlenemeyen mesajları loglamak veya farklı bir aksiyon almak için
-        errorHandler.addNotRetryableExceptions(IllegalArgumentException.class);
-
         return errorHandler;
-    }*/
+    }
 
-    /*@Bean
-    public KafkaTemplate<String, Exception> dltKafkaTemplate() {
+    @Bean
+    public ProducerFactory<String, MoneyProcessFailed> deadLetterProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        ProducerFactory<String, Exception> producerFactory = new DefaultKafkaProducerFactory<>(configProps);
-        return new KafkaTemplate<>(producerFactory);
-    }*/
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+//        ProducerFactory<String, Exception> producerFactory = new DefaultKafkaProducerFactory<>(configProps);
+//        return new KafkaTemplate<>(producerFactory);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
 
     /*@Bean
-    public ConsumerFactory<String, Exception> stringConsumerFactory() {
+    public ConsumerFactory<String,MoneyProcessFailed> deadLetterConsumerFactory(){
+        Map<String,Object> configProps = new HashMap<>();
+        JsonDeserializer<MoneyProcessFailed> deserializer = new JsonDeserializer<>(MoneyProcessFailed.class);
+
+        deserializer.addTrustedPackages("*");
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG,"dlt-group");
+
+        return new DefaultKafkaConsumerFactory<>(configProps,new StringDeserializer(),deserializer);
+    }*/
+    @Bean
+    public ConsumerFactory<String, MoneyProcessFailed> deadLetterConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "dlt-group");
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//        return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), new JsonDeserializer<>(MoneyProcessFailed.class));
         return new DefaultKafkaConsumerFactory<>(configProps);
-    }*/
+    }
 
-    /*@Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Exception> dltKafkaListenerContainerFactory(
-            ConsumerFactory<String, Exception> consumerFactory,
-            DefaultErrorHandler defaultErrorHandler) {
-        ConcurrentKafkaListenerContainerFactory<String, Exception> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    @Bean
+    public KafkaTemplate<String, MoneyProcessFailed> dltKafkaTemplate(){
+        return new KafkaTemplate<>(deadLetterProducerFactory());
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, MoneyProcessFailed> dltKafkaListenerContainerFactory(
+            ConsumerFactory<String, MoneyProcessFailed> consumerFactory,
+            DefaultErrorHandler deadLetterErrorHandler) {
+        ConcurrentKafkaListenerContainerFactory<String, MoneyProcessFailed> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
-        factory.setCommonErrorHandler(defaultErrorHandler);
+        factory.setCommonErrorHandler(deadLetterErrorHandler);
         return factory;
-    }*/
-
+    }
 }

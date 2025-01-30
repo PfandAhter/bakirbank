@@ -3,7 +3,7 @@
     <!--    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>-->
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
     <property name="LOG_PATH" value="C:/DEMOS/ServiceLogs/BakirWebService" />
-    <property name="SERVICE_NAME" value="BakirBank" />
+    <property name="SERVICE_NAME" value="BakirBank"  />
 
 
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
@@ -31,8 +31,22 @@
         </encoder>
     </appender>
 
+    <!-- Kafka Appender -->
+    <appender name="KAFKA" class="ch.qos.logback.core.kafka.KafkaAppender">
+        <topic>"Bakirbank_logs"</topic>
+        <producerConfig>
+            <entry key="bootstrap.servers" value="${KAFKA_BROKER}" />
+            <entry key="key.serializer" value="org.apache.kafka.common.serialization.StringSerializer" />
+            <entry key="value.serializer" value="org.apache.kafka.common.serialization.StringSerializer" />
+            <entry key="acks" value="1" />
+        </producerConfig>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="Console" />
         <appender-ref ref="FILE" />
-    </root>
+     </root>
 </configuration>

@@ -1,6 +1,7 @@
 package com.bakirbank.bakirbank.rest.controller.api;
 
 import com.bakirbank.bakirbank.api.request.CreateAccountRequest;
+import com.bakirbank.bakirbank.api.request.MakePaymentRequest;
 import com.bakirbank.bakirbank.api.request.MoneyTransferRequest;
 import com.bakirbank.bakirbank.api.response.AddMoneyResponse;
 import com.bakirbank.bakirbank.api.response.BaseResponse;
@@ -29,5 +30,8 @@ public interface AccountControllerApi {
 
     @PostMapping(path = "/transfer")
     ResponseEntity<BaseResponse> transferMoney(@Valid @RequestBody MoneyTransferRequest moneyTransferRequest);
+
+    @GetMapping(path = "/payment/makePayment")
+    ResponseEntity<Boolean> makePayment(MakePaymentRequest makePaymentRequest);
 
 }

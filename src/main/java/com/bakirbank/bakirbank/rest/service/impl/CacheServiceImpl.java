@@ -21,7 +21,7 @@ public class CacheServiceImpl implements ICacheService {
 
     private final ErrorCodeRepository errorCodeRepository;
 
-
+    @Override
     public void getErrorCodes() {
         try {
             List<ErrorCodes> errorCodes = errorCodeRepository.findAll();

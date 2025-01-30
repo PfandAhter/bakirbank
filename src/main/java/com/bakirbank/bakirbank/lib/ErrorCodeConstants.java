@@ -15,4 +15,6 @@ public class ErrorCodeConstants {
     public static final String ACCOUNT_NOT_FOUND = "H0035";
 
     public static final String BRANCH_NOT_FOUND = "H0036";
+
+    public static final String ACCOUNT_CREATE_FAILED = "H0043";
 }

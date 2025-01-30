@@ -28,6 +28,9 @@ public class CreateAccountRequest {
     @ValidName
     private String ownerName;
 
+    @NotNull(message = "Account name must not be null")
+    private String accountName;
+
     @NotNull(message = "Account type must not be null")
     @ValidAccountType
     private String accountType;

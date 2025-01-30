@@ -20,6 +20,6 @@ public class MicroServiceStartUp {
 
     @EventListener(ApplicationReadyEvent.class)
     public void logToDataBaseServiceReady() {
-        cacheService.getErrorCodesList();
+        cacheService.getErrorCodes();
     }
 }
